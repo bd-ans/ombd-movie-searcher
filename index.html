@@ -25,7 +25,7 @@
           <div class="form-floating placeholder-wave w-50">
             <select class="js-search-select form-select rounded-0 fs-5 rounded-start shadow-none pt-0 pb-0 mb-0 mt-0 placeholder pt-3 w-100 pe-4" id="floatingSelect" aria-label="Floating label select example">
               <option value="default" class="fw-bolder text-primary" selected>All</option>
-              <option value="movies" class="fw-bold">Movie</option>
+              <option value="movie" class="fw-bold">Movie</option>
               <option value="series" class="fw-bold">Series</option>
               <option value="episode" class="fw-bold">Episode</option>
             </select>
@@ -81,7 +81,7 @@
 
 <!-- main movies list template -->
 <template id="template-element">
-  <li class="mb-4 col-10 mx-auto mx-md-0 col-md-3">
+  <li class="mb-4 col-10 mx-auto mx-md-0 col-md-3 search-result__item">
     <!-- card heading -->
     <div class="card position-relative overflow-hidden shadow h-100">
       <div class="img-wrapper">
@@ -97,19 +97,20 @@
       </div>
 
       <!-- list group -->
-      <ul class="list-group list-group-flush overflow-auto">
-        <!-- release -->
+      <ul class="list-group list-group-flush overflow-auto mt-2">
+        <!-- release year -->
         <li class="list-group-item">
-          <h6 class="card-title fs-6 fw-bold rounded-5">
+          <h6 class="card-title fs-6 fw-bold rounded-5 mb-0">
             Year of release: 
             <span class="js-movie-release-year fw-lighter">
-            N/A
+              This is a release year
           </span>
         </h6>
         </li>
 
-        <!-- language & link -->
+        <!-- Type & link -->
         <li class="list-group-item d-flex justify-content-between align-items-center">
+          <!-- type -->
           <h6 class="card-title fs-6 fw-bold mb-1 rounded-5">
             Type:
             <span class="js-movie-language fw-lighter">
@@ -118,7 +119,7 @@
           </h6>
 
           <!-- link to the movie -->
-          <a href="#" class="js-yt-link card-link text-decoration-none rounded-5">IMDb Link</a>
+          <a href="#" class="js-omdb-link card-link text-decoration-none rounded-5">IMDb Link</a>
         </li>
 
         <!-- more info and add bookmark btn list -->
@@ -129,7 +130,7 @@
           </button>
 
           <!-- add bookmark btn -->
-          <button type="button" class="js-add-bookmark-btn btn btn-light border-secondary shadow-sm js-modal-btn w-25 border-start-0 rounded-0 rounded-end">
+          <button type="button" class="js-add-bookmark-btn btn btn-light border-secondary shadow-sm w-25 border-start-0 rounded-0 rounded-end">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-bookmark-plus" viewBox="0 0 16 16">
               <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
               <path d="M8 4a.5.5 0 0 1 .5.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5A.5.5 0 0 1 8 4z"/>
@@ -142,6 +143,7 @@
         <div class="modal fade js-modal w-100" id="exampleModalTest" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable w-100">
             <div class="modal-content mx-auto w-75">
+              <!-- modal header -->
               <div class="modal-header px-2 py-1">
                 <h5 class="modal-title js-modal-title" id="exampleModalLabel">Modal title</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -164,7 +166,7 @@
               <div class="modal-footer p-1">
                 <button type="button" class="btn btn-light border-secondary shadow-sm" data-bs-dismiss="modal">Close</button>
               </div>
-              <!-- modal btn -->
+              <!-- modal btn end -->
             </div>
           </div>
         </div>
