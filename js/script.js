@@ -6,11 +6,12 @@ const elSearchSelect = $('.js-search-select');
 const elSearchBtn = $('.js-search-btn');
 const elFailTxt = $('.js-fail-txt');
 const elPagination = document.querySelector('.js-pagination');
+let elAddBookmarkBtn = document.querySelectorAll('.js-add-bookmark-btn');
 
 let arr = [];
 let totalResults = '';
 let selectedCategory = [];
-let h  = 'All';
+let mainData  = 'All';
 let savedMovies = JSON.parse(localStorage.getItem('savedMovies') || '[]');
 
 // default api request details
@@ -48,6 +49,8 @@ function mainFunc() {
         movieElement.querySelector('.js-modal').id = `q${arr.imdbID}`;
         movieElement.querySelector('.js-modal-title').id = `q${arr.imdbID}`;
         movieElement.querySelector('.js-modal-btn').setAttribute('data-bs-target', `#q${arr.imdbID}`);
+        movieElement.querySelector('.js-add-bookmark-btn').id = `q${arr.imdbID}`;
+        elAddBookmarkBtn = movieElement.querySelector(`#q${arr.imdbID}`);
 
         return movieElement;
     }
@@ -59,12 +62,72 @@ function mainFunc() {
     
         arr.forEach(movies => {
             fragment.appendChild(createMovieElement(movies));
+
+            //on  bookmark btn clicked
+        elAddBookmarkBtn.addEventListener('click', function () {
+            var bookmarkBtnStatus = true;
+            if (savedMovies.length == 0) {
+                savedMovies.push(movies);
+                localStorage.setItem('savedMovies', JSON.stringify(savedMovies));
+            } else {
+                savedMovies.forEach(item => {
+                    if (item.imdbID == movies.imdbID) {
+                        bookmarkBtnStatus = false;
+                        savedMovies.splice(savedMovies.indexOf(item), 1);
+                        localStorage.setItem('savedMovies', JSON.stringify(savedMovies));
+                    }
+                })
+                if (bookmarkBtnStatus) {
+                    savedMovies.push(movies);
+                    localStorage.setItem('savedMovies', JSON.stringify(savedMovies));
+                }
+            }
+            
+            // on click change bookmark btn icon
+            elAddBookmarkBtn = document.querySelector('#q' + movies.imdbID);
+            elAddBookmarkBtn.classList.toggle('active-bookmark');
+            if (elAddBookmarkBtn.classList.contains('active-bookmark')) {
+                elAddBookmarkBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-bookmark-dash" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M5.5 6.5A.5.5 0 0 1 6 6h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5z"/>
+                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                </svg>`;
+            } else {
+                elAddBookmarkBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-bookmark-plus" viewBox="0 0 16 16">
+                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
+                <path d="M8 4a.5.5 0 0 1 .5.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5A.5.5 0 0 1 8 4z"/>
+                </svg>`;
+            }
+            localStorage.setItem('savedMovies', JSON.stringify(savedMovies));
+            arr = savedMovies;
+        })
         });
         
         moviesList.appendChild(fragment);
     }
     
     renderNews(arr);
+
+
+    elBookmarksBtn.addEventListener('click', function () {
+        elFailTxt.classList.add('d-none');
+        if (elBookmarksBtn.textContent == 'Bookmarks') {
+            elBookmarksBtn.textContent = 'All Movies';
+            renderNews(savedMovies);
+            mainData = savedMovies;
+        } else {
+            elBookmarksBtn.textContent = 'Bookmarks';
+            mainFunc();
+            // mainData = mainData;
+        }
+    
+        if (savedMovies.length == 0) {
+            elBookmarksBtn.textContent = 'Bookmarks';
+            renderNews(defaultMoviesList);
+            mainFunc();
+            // mainData = defaultMoviesList;
+        }
+    })
+
     if (arr.length === 0) {
         elFailTxt.classList.remove('d-none');
     } else {
@@ -74,7 +137,6 @@ function mainFunc() {
 
 // pagination
 let pagination = function (totalResults) {
-    // console.log(totalResults);
     let totalPages = Math.ceil(totalResults / 10);
     let pagination = '';
     if (totalPages >= 200) {
@@ -138,8 +200,6 @@ defaultMoviesList();
 
 // api request
 const searchMovies = async movie => {
-
-    // title = elSearchInput.value;
     try {
         const urlApi = await fetch('https://www.omdbapi.com/?apikey='
                         +apiKey+'&type='  // api key
@@ -201,231 +261,3 @@ elSearchBtn.onclick = function () {
     searchMovies(value)
     }
 }
-
-
-// elPagination.addEventListener('click', function (event) {
-//     let paginatedPaginationBtn = elPagination.querySelector('.active');
-//     paginatedPaginationBtn.classList.remove('active');
-
-//     if (event.target.classList.contains('js-pagination-btn')) {
-//         let elPaginationBtn = document.querySelector('.js-pagination-btn');
-//         console.log(elPaginationBtn = event.target.textContent + ' type ' +type + ' title ' +title);
-
-//         let currentPage = elPagination.querySelector(`#paginate-btn${elPaginationBtn = event.target.textContent}`);
-//         console.log(currentPage);
-//         page = elPaginationBtn = event.target.textContent;
-
-//         searchMovies(title);
-//         currentPage.classList.add('active');
-//     }
-// })
-
-// // Pagination
-// async function paginationFunction() {
-//     const postsData = arr;
-//     let currentPage = 1;
-//     let rows = 5;
-
-//     // let pagination calc function
-//     function displayList(arrData, rowPerPage, page) {
-//         page--;
-
-//         const start = rowPerPage * page;
-//         const end = start + rowPerPage;
-//         const paginatedData = arrData.slice(start, end);
-
-//         paginatedData.forEach((el) => {
-//         const postEl = document.createElement("div");
-//         postEl.classList.add("post");
-//         postEl.innerText = `${el.Title}`;
-//         })
-//         arr = paginatedData;
-//         mainFunc();
-//     }
-
-//     // render pagination
-//     function displayPagination(arrData, rowPerPage) {
-//         const paginationEl = document.querySelector('.pagination');
-//         paginationEl.innerHTML = "";
-//         const pagesCount = Math.ceil(arrData.length / rowPerPage);
-//         const ulEl = document.createElement("ul");
-//         ulEl.classList.add('pagination__list');
-    
-//         for (let i = 0; i < pagesCount; i++) {
-//             const liEl = displayPaginationBtn(i + 1);
-//             ulEl.appendChild(liEl)
-//         }
-//         paginationEl.appendChild(ulEl)
-//     }
-//     // render pagination btn and func
-//     function displayPaginationBtn(page) {
-//         const liEl = document.createElement("li");
-//         liEl.classList.add('pagination__item')
-//         liEl.innerText = page
-    
-//         if (currentPage == page) liEl.classList.add('pagination__item--active');
-    
-//         liEl.addEventListener('click', () => {
-//         currentPage = page
-//         displayList(postsData, rows, currentPage)
-
-//         let currentItemLi = document.querySelector('li.pagination__item--active');
-//         currentItemLi.classList.remove('pagination__item--active');
-
-//         liEl.classList.add('pagination__item--active');
-//     })
-
-//     return liEl;
-//     }
-
-//     displayList(postsData, rows, currentPage);
-//     displayPagination(postsData, rows);
-// }
-
-
-// const moviesList = $('.js-movies-list');
-// const moviesCardTemplate = $('#template-element').content;
-
-// const searchInput = $('.js-search-input');
-// const searchSelect = $('.js-search-select');
-// const searchBtn = $('.js-search-btn');
-// const elFailTxt = $('.js-fail-txt');
-
-// let arr = [];
-// let selectedCategory = [];
-// let mainData  = 'All';
-// let savedMovies = JSON.parse(localStorage.getItem('savedMovies') || '[]');
-
-
-// // render function
-// function mainFunc() {
-//     // check if there is a search value
-//     let filt = arr;
-//     if (mainData == 'All') {
-//         if (selectedCategory == null) {
-//         } else {
-//             arr = [...selectedCategory];
-//         }
-//         filt = arr;
-//         arr = filt;
-//     } else if (mainData == 'movie') {
-//         if (selectedCategory == null) {
-//         } else {
-//             arr = [...selectedCategory];
-//         }
-//         filt = arr.filter(item => item.Type.includes(searchSelect.value))
-//         arr = filt;
-//     } else if (mainData == 'series') {
-//         if (selectedCategory == null) {
-//         } else {
-//             arr = [...selectedCategory];
-//         }
-//         filt = arr.filter(item => item.Type.includes(searchSelect.value))
-//         arr = filt;
-//     }
-//     // creating elements for movies list
-//     let createMovieElement = function (arr) {
-//         let movieElement = moviesCardTemplate.cloneNode(true);
-//         if (arr.Poster == 'N/A' || arr.Poster == null) {
-//             movieElement.querySelector('.js-movie-img').src = 'img/not-found.png';
-//         } else {
-//             movieElement.querySelector('.js-movie-img').src = arr.Poster;
-//         }
-//         movieElement.querySelector('.js-movie-img').alt = arr.Title;
-//         movieElement.querySelector('.js-modal-movie-img').src = arr.Poster;
-//         movieElement.querySelector('.js-modal-movie-img').alt = arr.Title;
-//         movieElement.querySelector('.js-movie-title').textContent = arr.Title;
-//         movieElement.querySelector('.js-modal-title').textContent = arr.Title;
-//         movieElement.querySelector('.js-movie-release-year').textContent = arr.Year;
-//         movieElement.querySelector('.js-movie-language').textContent = arr.Type;
-//         movieElement.querySelector('.js-omdb-link').href = `https://www.imdb.com/title/${arr.imdbID}/?ref_=hm_fanfav_tt_i_2_pd_fp1`;
-//         movieElement.querySelector('.js-modal').id = `exampleModal${arr.imdbID}`;
-//         movieElement.querySelector('.js-modal-title').id = `exampleModal${arr.imdbID}`;
-//         movieElement.querySelector('.js-modal-btn').setAttribute('data-bs-target', `#exampleModal${arr.imdbID}`);
-    
-//         return movieElement;
-//     }
-
-//     // render function
-//     let renderMovies = function (arr) {
-//         moviesList.innerHTML = null;
-//         let fragment = document.createDocumentFragment();
-    
-//         arr.forEach(movie => {
-//             fragment.appendChild(createMovieElement(movie));
-//         });
-        
-//         moviesList.appendChild(fragment);
-//     }
-    
-//     renderMovies(arr);
-// }
-
-// // api request
-// function searchMovies(event) {
-//     let urlApi = `https://www.omdbapi.com/?apikey=5f77c14a&s=${event}`;
-
-//     setTimeout(() => {
-//         moviesList.innerHTML = null;
-//         mainFunc();
-//     }, 1000);
-    
-//     fetch(urlApi)
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.Response == 'True') {
-//             arr = [...data.Search];
-//             selectedCategory = arr.slice();
-//             console.log('heave data');
-//         } else {
-//             arr = [];
-//             selectedCategory = [];
-//             console.log('no data');
-//         }
-//     })
-//     .catch(err => console.log(err))
-// }
-
-// // search select
-// searchSelect.addEventListener('change', function () {
-//     if (searchSelect.value === 'All') {
-//         let filt = arr;
-//         arr = [...selectedCategory];
-//         filt = arr;
-//         arr = filt;
-//         mainData = 'All';
-//     } else if (searchSelect.value === 'movie') {
-//         arr = [...selectedCategory];
-//         filt = arr.filter(item => item.Type.includes(searchSelect.value))
-//         arr = filt;
-//         mainData = 'movie';
-//     } else if (searchSelect.value === 'series') {
-//         arr = [...selectedCategory];
-//         filt = arr.filter(item => item.Type.includes(searchSelect.value))
-//         arr = filt;
-//         mainData = 'series';
-//     }
-
-//     mainFunc();
-//     elFailTxt.classList.add('d-none');
-// });
-// // category select end
-// searchMovies('humans');
-// // Search input
-// searchInput.oninput = function () {
-//     let value = searchInput.value;
-//     moviesList.innerHTML = null;
-//     setTimeout(() => {
-//         if (arr == '' || arr == null) {
-//             elFailTxt.classList.remove('d-none');
-//             if (value == '') {
-//                 elFailTxt.classList.add('d-none');
-//             }
-//         } else {
-//             elFailTxt.classList.add('d-none');
-//         }
-//     }, 1000);
-
-//     searchMovies(value)
-// }
-// // Search input end
