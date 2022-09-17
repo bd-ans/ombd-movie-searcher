@@ -20,7 +20,6 @@ let type = '';
 let title = '';
 let page = '';
 
-localStorage.removeItem('activePaginationBtn');
 function mainFunc() {
     let createMovieElement = function (arr) {
 
@@ -46,10 +45,11 @@ function mainFunc() {
         movieElement.querySelector('.js-movie-language').textContent = arr.Type;
         movieElement.querySelector('.js-omdb-link').href = `https://www.imdb.com/title/${arr.imdbID}/?ref_=hm_fanfav_tt_i_2_pd_fp1`;
 
-        movieElement.querySelector('.js-modal').id = `q${arr.imdbID}`;
-        movieElement.querySelector('.js-modal-title').id = `q${arr.imdbID}`;
-        movieElement.querySelector('.js-modal-btn').setAttribute('data-bs-target', `#q${arr.imdbID}`);
+        movieElement.querySelector('.js-modal').id = `modal${arr.imdbID}`;
+        movieElement.querySelector('.js-modal-title').id = `modal${arr.imdbID}`;
+        movieElement.querySelector('.js-modal-btn').setAttribute('data-bs-target', `#modal${arr.imdbID}`);
         movieElement.querySelector('.js-add-bookmark-btn').id = `q${arr.imdbID}`;
+        console.log(arr.imdbID);
         elAddBookmarkBtn = movieElement.querySelector(`#q${arr.imdbID}`);
 
         return movieElement;
@@ -224,7 +224,7 @@ const searchMovies = async movie => {
     } finally {
         elSearchBtn.disabled = false;
         elSearchBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        <path d="M11.742 1 0.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>`;
         pagination(totalResults);
     }
