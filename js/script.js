@@ -5,20 +5,22 @@ const elSearchInput = $('.js-search-input');
 const elSearchSelect = $('.js-search-select');
 const elSearchBtn = $('.js-search-btn');
 const elFailTxt = $('.js-fail-txt');
+const elPagination = document.querySelector('.js-pagination');
 
 let arr = [];
+let totalResults = '';
 let selectedCategory = [];
-let mainData  = 'All';
+let h  = 'All';
 let savedMovies = JSON.parse(localStorage.getItem('savedMovies') || '[]');
 
 // default api request details
 const apiKey = '5f77c14a'; // api key
-let type = '';            // type of search
-let title = 'humans';    // default title of search
-let page = '1';         // page of search
+let type = '';
+let title = '';
+let page = '';
 
+localStorage.removeItem('activePaginationBtn');
 function mainFunc() {
-    // creating elements for news list
     let createMovieElement = function (arr) {
 
         let movieElement = moviesCardTemplate.cloneNode(true);
@@ -70,30 +72,61 @@ function mainFunc() {
     }
 }
 
+// pagination
+let pagination = function (totalResults) {
+    // console.log(totalResults);
+    let totalPages = Math.ceil(totalResults / 10);
+    let pagination = '';
+    if (totalPages >= 200) {
+        pagination += `<li class="page-item"><a class="page-link js-page-link" id="paginate-btn${i}">${i}</a></li>`;
+    } else {
+    for (let i = 1; i <= totalPages; i++) {
+        pagination += `<li class="page-item"><a class="page-link js-page-link" id="paginate-btn${i}">${i}</a></li>`;
+    }
+    }
+    elPagination.innerHTML = pagination;
+    
+    let elPaginateBtn = document.querySelectorAll('.js-page-link');
+    elPaginateBtn.forEach(el => {
+        el.addEventListener('click', function (e) {
+
+            e.preventDefault();
+            page = e.target.textContent;
+            title = elSearchInput.value;
+            if (title === '') {
+                title = 'humans';
+            }
+            searchMovies(title);
+
+            document.querySelector('.js-page-ind').textContent = `Page ${page} of ${totalPages}`;
+        })
+    })
+    
+}
+
 // default api request
 const defaultMoviesList = async movie => {
     try {
-        const urlApi = await fetch('https://www.omdbapi.com/?apikey='
-                        +apiKey+'&type='  // api key
-                        +type+'&s='     // type of search
-                        +title+'&page=' // title of search
-                        +page+')');     // page of search
+        const urlApi = await fetch(`https://www.omdbapi.com/?apikey=5f77c14a&type=&s=humans&page=1`)
         const data = await urlApi.json();
         
         if (data.status === 404) {
             arr = [];
             elFailTxt.classList.remove('d-none');
+            alert('No results found');
             return;
         } else {
             elSearchInput.blur();
             elFailTxt.classList.add('d-none');
             arr = data.Search;
+            totalResults = data.totalResults;
             mainFunc();
+            pagination(totalResults);
+
         }
     } catch (err) {
         elFailTxt.classList.remove('d-none');
     } finally {
-        elSearchInput.value = '';
             elSearchBtn.disabled = false;
             elSearchBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
             <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
@@ -105,12 +138,14 @@ defaultMoviesList();
 
 // api request
 const searchMovies = async movie => {
+
+    // title = elSearchInput.value;
     try {
         const urlApi = await fetch('https://www.omdbapi.com/?apikey='
                         +apiKey+'&type='  // api key
                         +type+'&s='     // type of search
                         +movie+'&page=' // title of search
-                        +page+')');     // page of search
+                        +page);     // page of search
         const data = await urlApi.json();
         
         if (data.status === 404) {
@@ -121,17 +156,17 @@ const searchMovies = async movie => {
             elSearchInput.blur();
             elFailTxt.classList.add('d-none');
             arr = data.Search;
+            totalResults = data.totalResults;
             mainFunc();
         }
     } catch (err) {
         elFailTxt.classList.remove('d-none');
-        return;
     } finally {
-        elSearchInput.value = '';
         elSearchBtn.disabled = false;
         elSearchBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
         <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
         </svg>`;
+        pagination(totalResults);
     }
 }
 
@@ -156,7 +191,6 @@ elSearchInput.addEventListener('keyup', function (event) {
 elSearchBtn.onclick = function () {
     let value = elSearchInput.value.toLowerCase().trim();
     if (value === '') {
-        elSearchInput.value = null;
         return;
     } else {
     moviesList.innerHTML = null;
@@ -167,6 +201,24 @@ elSearchBtn.onclick = function () {
     searchMovies(value)
     }
 }
+
+
+// elPagination.addEventListener('click', function (event) {
+//     let paginatedPaginationBtn = elPagination.querySelector('.active');
+//     paginatedPaginationBtn.classList.remove('active');
+
+//     if (event.target.classList.contains('js-pagination-btn')) {
+//         let elPaginationBtn = document.querySelector('.js-pagination-btn');
+//         console.log(elPaginationBtn = event.target.textContent + ' type ' +type + ' title ' +title);
+
+//         let currentPage = elPagination.querySelector(`#paginate-btn${elPaginationBtn = event.target.textContent}`);
+//         console.log(currentPage);
+//         page = elPaginationBtn = event.target.textContent;
+
+//         searchMovies(title);
+//         currentPage.classList.add('active');
+//     }
+// })
 
 // // Pagination
 // async function paginationFunction() {
